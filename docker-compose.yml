@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+  api:
+    image: mohamedzd1/lms-api:latest
+    container_name: api
+    restart: always
+    ports:
+      - "${APP_PORT}:6060"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
+      APP_PORT: ${APP_PORT}
+    depends_on:
+      - mongo
+      - minio
+    networks:
+      - backend
+
+  admin-dashboard:
+    image: mohamedzd1/lms-admin-dashboard:latest
+    container_name: lms-admin
+    restart: always
+    ports:
+      - "${ADMIN_PORT}:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL}
+    depends_on:
+      - api
+    networks:
+      - frontend
+      - backend
+
+  manger-dashboard:
+    image: mohamedzd1/lms-manger-dashboard:latest
+    container_name: lms-manger
+    restart: always
+    ports:
+      - "${MANGER_PORT}:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL}
+    depends_on:
+      - api
+    networks:
+      - frontend
+      - backend
+
+  learner-dashboard:
+    image: mohamedzd1/lms-learner-dashboard:latest
+    container_name: lms-learner
+    restart: always
+    ports:
+      - "${LEARNER_PORT}:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL}
+    depends_on:
+      - api
+    networks:
+      - frontend
+      - backend
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - backend
+
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9090"
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend
+
+volumes:
+  mongo_data:
+  minio_data:
+
+networks:
+  frontend:
+  backend:
