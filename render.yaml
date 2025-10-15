@@ -2,5 +2,5 @@ services:
   - type: web
     name: lms
     env: docker
-    dockerCommand: docker-compose up
+    dockerfilePath: ./docker-compose.yml
     plan: free
