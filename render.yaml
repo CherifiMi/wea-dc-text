@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: lms
+    env: docker
+    dockerCommand: docker-compose up
+    plan: free
